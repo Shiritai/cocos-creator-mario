@@ -1,0 +1,31 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "BigMarioJump",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 0.5166666666666667,
+  "sample": 60,
+  "speed": 1,
+  "wrapMode": 1,
+  "curveData": {
+    "comps": {
+      "cc.Sprite": {
+        "spriteFrame": [
+          {
+            "frame": 0,
+            "value": {
+              "__uuid__": "c14be640-bcb5-4657-9fb5-f1fa731d3076"
+            }
+          },
+          {
+            "frame": 0.5,
+            "value": {
+              "__uuid__": "8be9f86a-1b4d-487d-b2f1-9e25d67f65f2"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "events": []
+}

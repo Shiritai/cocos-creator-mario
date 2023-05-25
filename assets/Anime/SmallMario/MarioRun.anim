@@ -1,0 +1,49 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "MarioRun",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 0.6833333333333333,
+  "sample": 60,
+  "speed": 1,
+  "wrapMode": 2,
+  "curveData": {
+    "comps": {
+      "cc.Sprite": {
+        "spriteFrame": [
+          {
+            "frame": 0,
+            "value": {
+              "__uuid__": "38c36930-9a0f-4a78-800c-b7a408e8d7de"
+            }
+          },
+          {
+            "frame": 0.16666666666666666,
+            "value": {
+              "__uuid__": "e4a4088c-0dfb-4612-9f9a-c719460d11f0"
+            }
+          },
+          {
+            "frame": 0.3333333333333333,
+            "value": {
+              "__uuid__": "4698d22b-db28-4955-a1c5-ecf52212cb64"
+            }
+          },
+          {
+            "frame": 0.5,
+            "value": {
+              "__uuid__": "e361106e-46a6-4127-93ba-3a0515a96f27"
+            }
+          },
+          {
+            "frame": 0.6666666666666666,
+            "value": {
+              "__uuid__": "38c36930-9a0f-4a78-800c-b7a408e8d7de"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "events": []
+}
