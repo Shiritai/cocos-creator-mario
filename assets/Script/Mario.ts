@@ -8,7 +8,7 @@
 import { BodyType } from "../Function/BodyType";
 import { Movement, MovementRef, resetAll, resetLeft, resetRight, resetUp, setLeft, setRight, setUp } from "../Function/Movement";
 import { serialize } from "../Function/Serialize";
-import { UserInfo, addUserInfoUpdatedCallback, userInfo } from "../Function/auth";
+import { UserInfo, addUserInfoUpdatedCallback, removeUserInfoUpdatedCallback, userInfo } from "../Function/auth";
 
 const {ccclass, property} = cc._decorator;
 
@@ -87,9 +87,16 @@ export default class Mario extends cc.Component implements MovementRef {
             username = 'anonymous'
         }
         this.usernameLabel.string = username.toUpperCase();
-        addUserInfoUpdatedCallback((info: UserInfo) => {
-            this.usernameLabel.string = info.username.toUpperCase();
-        });
+        addUserInfoUpdatedCallback(this.setUpUsername);
+        this.getComponent(cc.PhysicsCollider).tag = BodyType.PLAYER;
+    }
+
+    onDestroy(): void {
+        removeUserInfoUpdatedCallback(this.setUpUsername);
+    }
+
+    setUpUsername = (info: UserInfo) => {
+        this.usernameLabel.string = info.username.toUpperCase();
     }
 
     update (dt: number) {
