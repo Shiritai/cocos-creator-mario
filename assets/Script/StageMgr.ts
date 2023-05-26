@@ -21,6 +21,7 @@ export default class StageMgr extends cc.Component {
     
     static readonly initTimerValue = 300;
     static readonly scoreStrLength = 6;
+    static readonly mushroomSpeed = 150;
     static readonly enemySpeed = 100;
     user: string;
     email: string;
@@ -28,8 +29,7 @@ export default class StageMgr extends cc.Component {
 
     static setUpPreSolveForEnemyWanderer(enemyRigid: cc.RigidBody, isDeadRef: { isDead: boolean }) {
         enemyRigid.linearVelocity = cc.v2(-StageMgr.enemySpeed, 0);
-        enemyRigid.onPreSolve = 
-        (
+        enemyRigid.onPreSolve = (
             contact: cc.PhysicsContact,
             selfCollider: cc.PhysicsCollider,
             otherCollider: cc.PhysicsCollider) => 
@@ -335,7 +335,9 @@ export default class StageMgr extends cc.Component {
                     selfCollider: cc.PhysicsCollider,
                     otherCollider: cc.PhysicsCollider) => 
                 {
-                    if (otherCollider.tag == BodyType.BARRIER || !eatable) {
+                    if (otherCollider.tag == BodyType.BARRIER ||
+                        otherCollider.tag == BodyType.ENEMY || !eatable)
+                    {
                         contact.disabled = true;
                         return;
                     }
@@ -350,6 +352,30 @@ export default class StageMgr extends cc.Component {
                     }
                     prefab.destroy();
                 }
+        
+                mushroomRigid.onPreSolve = (
+                    contact: cc.PhysicsContact,
+                    selfCollider: cc.PhysicsCollider,
+                    otherCollider: cc.PhysicsCollider) => 
+                {
+                    if (otherCollider.tag == BodyType.BARRIER ||
+                        otherCollider.tag == BodyType.ENEMY || !eatable)
+                    {
+                        contact.disabled = true;
+                        return;
+                    }
+                    if (Math.abs(mushroomRigid.linearVelocity.x) != StageMgr.mushroomSpeed &&
+                        Math.abs(contact.getWorldManifold().normal.x) == 1)
+                    {
+                        mushroomRigid.linearVelocity = cc.v2(
+                            contact.getWorldManifold().normal.x < 0 ?
+                                StageMgr.mushroomSpeed : -StageMgr.mushroomSpeed,
+                            mushroomRigid.linearVelocity.y
+                        );
+                        contact.disabled = true;
+                    }
+                    contact.setFriction(0);
+                }
                 
                 itemAction = cc.sequence(
                     cc.spawn(
@@ -357,7 +383,7 @@ export default class StageMgr extends cc.Component {
                         cc.blink(1, 8)
                     ),
                     cc.callFunc(() => {
-                        mushroomRigid.linearVelocity = cc.v2(-150, 0);
+                        mushroomRigid.linearVelocity = cc.v2(-StageMgr.mushroomSpeed, 0);
                         mushroomRigid.type = cc.RigidBodyType.Dynamic;
                         eatable = true;
                     })
