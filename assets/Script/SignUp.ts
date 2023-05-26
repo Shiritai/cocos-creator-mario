@@ -5,8 +5,8 @@
 // Learn life-cycle callbacks:
 //  - https://docs.cocos.com/creator/manual/en/scripting/life-cycle-callbacks.html
 
-import { UserInfo, addUserInfoUpdatedCallback, email2uid, getDefaultUserInfo, updateUserInfo, userInfo } from "../Function/auth";
-import { firebaseAssignUpdateCallback, firebaseOnUpdateUserInfo, firebaseSetUserInfo } from "../Function/database";
+import { email2uid, getDefaultUserInfo, userInfo } from "../Function/auth";
+import { firebaseAssignUpdateCallback, firebaseOnUserInfoUpdateRankList, firebaseOnUpdateUserInfo, firebaseSetUserInfo } from "../Function/database";
 
 const {ccclass, property} = cc._decorator;
 
@@ -34,8 +34,6 @@ export default class SignUp extends cc.Component {
         firebase.auth()
             .createUserWithEmailAndPassword(email, password)
             .then(() => {
-                firebase.database().ref(`scores/${uid}`)
-                    .set({ score: 0 });
                 userInfo.info = getDefaultUserInfo(email, username);
                 firebaseSetUserInfo(uid)
                     .then(() => { 
@@ -47,6 +45,7 @@ export default class SignUp extends cc.Component {
                         alert(error.message); 
                     });
                 firebaseAssignUpdateCallback(uid);
+                firebaseOnUserInfoUpdateRankList();
             })
             .catch((error: Error) => { 
                 alert(error.message); 
