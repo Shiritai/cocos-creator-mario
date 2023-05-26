@@ -5,22 +5,129 @@
 // Learn life-cycle callbacks:
 //  - https://docs.cocos.com/creator/manual/en/scripting/life-cycle-callbacks.html
 
+import { RankItem, UserInfo, addRankListUpdatedCallback, addUserInfoUpdatedCallback, rankList, removeRankListUpdatedCallback, removeUserInfoUpdatedCallback, userInfo } from "../Function/auth";
+
 const {ccclass, property} = cc._decorator;
 
 @ccclass
 export default class NewClass extends cc.Component {
-    start () {}
 
+    @property(cc.AudioClip)
+    BGM: cc.AudioClip = null;
+
+    @property(cc.Node)
+    howToPlay: cc.Node = null;
+
+    @property(cc.Node)
+    rankList: cc.Node = null;
+
+    @property(cc.Layout)
+    countList: cc.Layout = null;
+
+    @property(cc.Layout)
+    usernameList: cc.Layout = null;
+
+    @property(cc.Layout)
+    scoreList: cc.Layout = null;
+
+    @property(cc.Prefab)
+    rankCountPrefab: cc.Prefab = null;
+
+    @property(cc.Prefab)
+    rankNamePrefab: cc.Prefab = null;
+
+    @property(cc.Prefab)
+    rankScorePrefab: cc.Prefab = null;
+
+    @property(cc.Label)
+    username: cc.Label = null;
+
+    @property(cc.Label)
+    score: cc.Label = null;
+
+    @property(cc.Label)
+    coin: cc.Label = null;
+
+    @property(cc.Label)
+    stage: cc.Label = null;
+
+    start(): void {
+        cc.audioEngine.playMusic(this.BGM, true);
+        if (userInfo.info) {
+            this.setUpLabel(userInfo.info);
+        }
+        addUserInfoUpdatedCallback(this.setUpLabel);
+        if (rankList.list) {
+            this.setUpRankList(rankList.list);
+        }
+        addRankListUpdatedCallback(this.setUpRankList);
+    }
+
+    setUpLabel = (newUser: UserInfo) => {
+        this.scheduleOnce(() => {
+            this.username.string = newUser.username.toUpperCase();
+            this.score.string = newUser.score.toString();
+            this.coin.string = newUser.coin.toString();
+            this.stage.string = (newUser.stage + 1).toString();
+        });
+    }
+
+    setUpRankList = (newList: RankItem[]) => {
+        this.scheduleOnce(() => {
+            this.countList.node.removeAllChildren();
+            this.usernameList.node.removeAllChildren();
+            this.scoreList.node.removeAllChildren();
+
+            for (let i = 0; i < Math.min(5, newList.length); ++i) {
+                let count = cc.instantiate(this.rankCountPrefab);
+                count.getComponent(cc.Label).string = (i + 1).toString();
+                this.countList.node.addChild(count);
+    
+                let name = cc.instantiate(this.rankNamePrefab);
+                name.getComponent(cc.Label).string = newList[i].username.toUpperCase();
+                this.usernameList.node.addChild(name);
+    
+                let score = cc.instantiate(this.rankScorePrefab);
+                score.getComponent(cc.Label).string = newList[i].score.toString();
+                this.scoreList.node.addChild(score);
+            }
+        });
+    }
+
+    onDestroy(): void {
+        removeUserInfoUpdatedCallback(this.setUpLabel);
+        removeRankListUpdatedCallback(this.setUpRankList);
+    }
+    
     openHowToPlay() {
-        let howToPlay = cc.find("Canvas/HowToPlay");
-        howToPlay.active = !howToPlay.active;
+        this.rankList.active = false;
+        this.howToPlay.active = !this.howToPlay.active;
+    }
+    
+    openRankList() {
+        this.howToPlay.active = false;
+        this.rankList.active = !this.rankList.active;
+    }
+
+    private loadStage(stageCount: number, scene: string) {
+        if (!userInfo.info) {
+            alert(`You haven\'t signed in, but you can try stage ${stageCount} :)`);
+            cc.director.loadScene(scene);
+        } else {
+            let availStageCount = userInfo.info.stage + 1;
+            if (availStageCount >= stageCount) {
+                cc.director.loadScene(scene);
+            } else {
+                alert(`You can\'t play this stage, please clear the former stage: ${availStageCount} first :)`);
+            }
+        }
     }
 
     loadStage1() {
-        cc.director.loadScene('LoadStage1');
+        this.loadStage(1, 'LoadStage1')
     }
     
     loadStage2() {
-        cc.director.loadScene('LoadStage2');
+        this.loadStage(2, 'LoadStage2')
     }
 }
