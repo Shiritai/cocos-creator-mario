@@ -7,6 +7,7 @@
 
 import { BodyType } from "../Function/BodyType";
 import { email2uid, getDefaultUserInfo, updateUserInfo, userInfo } from "../Function/auth";
+import { firebaseUpdateScore } from "../Function/database";
 import Mario from "./Mario";
 
 const {ccclass, property} = cc._decorator;
@@ -489,10 +490,9 @@ export default class StageMgr extends cc.Component {
                         score: this.score,
                         time: this.timer
                     });
-                    // upload score
-                    firebase.database()
-                        .ref(`scores/${email2uid(userInfo.info.email)}`)
-                        .update({ score: this.score });
+                    // upload score if has higher score rank
+                    if (userInfo.info.score < this.score)
+                        firebaseUpdateScore(email2uid(userInfo.info.email), this.score)
                 }
             }
         });

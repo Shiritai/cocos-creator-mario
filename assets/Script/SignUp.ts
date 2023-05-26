@@ -6,6 +6,7 @@
 //  - https://docs.cocos.com/creator/manual/en/scripting/life-cycle-callbacks.html
 
 import { UserInfo, addUserInfoUpdatedCallback, email2uid, getDefaultUserInfo, updateUserInfo, userInfo } from "../Function/auth";
+import { firebaseAssignUpdateCallback, firebaseOnUpdateUserInfo, firebaseSetUserInfo } from "../Function/database";
 
 const {ccclass, property} = cc._decorator;
 
@@ -36,30 +37,16 @@ export default class SignUp extends cc.Component {
                 firebase.database().ref(`scores/${uid}`)
                     .set({ score: 0 });
                 userInfo.info = getDefaultUserInfo(email, username);
-                firebase.database().ref(`users/${uid}`)
-                    .set(userInfo.info)
+                firebaseSetUserInfo(uid)
                     .then(() => { 
                         cc.log('Initialized firebase');
-                        firebase.database().ref(`users/${uid}`)
-                            .on('value', (snapshot) => {
-                                if (snapshot.exists()) {
-                                    cc.log('Load from firebase');
-                                    updateUserInfo(snapshot.val());
-                                } else {
-                                    console.log("No data available");
-                                }
-                            })
+                        firebaseOnUpdateUserInfo(uid);
                         alert("Signed up successfully");
                         cc.director.loadScene("ChooseStage");
                     }).catch((error: Error) => { 
                         alert(error.message); 
                     });
-                let updateToFirebase = (newUser: UserInfo): void => {
-                    cc.log('Push to firebase');
-                    firebase.database().ref(`users/${uid}`)
-                        .update(newUser);
-                }
-                addUserInfoUpdatedCallback(updateToFirebase);
+                firebaseAssignUpdateCallback(uid);
             })
             .catch((error: Error) => { 
                 alert(error.message); 

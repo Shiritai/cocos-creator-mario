@@ -6,6 +6,7 @@
 //  - https://docs.cocos.com/creator/manual/en/scripting/life-cycle-callbacks.html
 
 import { UserInfo, addUserInfoUpdatedCallback, email2uid, updateUserInfo } from "../Function/auth";
+import { firebaseAssignUpdateCallback, firebaseOnUpdateUserInfo } from "../Function/database";
 
 const {ccclass, property} = cc._decorator;
 
@@ -29,22 +30,8 @@ export default class LogIn extends cc.Component {
         firebase.auth()
             .signInWithEmailAndPassword(email, password)
             .then(() => {
-                // load data and add listener on firebase
-                firebase.database().ref(`users/${uid}`)
-                    .on('value', (snapshot) => {
-                        if (snapshot.exists()) {
-                            cc.log('Load from firebase');
-                            updateUserInfo(snapshot.val());
-                        } else {
-                            console.log("No data available");
-                        }
-                    })
-                let updateToFirebase = (newUser: UserInfo): void => {
-                    cc.log('Push to firebase');
-                    firebase.database().ref(`users/${uid}`)
-                        .update(newUser);
-                }
-                addUserInfoUpdatedCallback(updateToFirebase);
+                firebaseOnUpdateUserInfo(uid);
+                firebaseAssignUpdateCallback(uid);
                 alert("Logged in successfully");
                 cc.director.loadScene("ChooseStage");
             })
