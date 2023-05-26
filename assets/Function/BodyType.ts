@@ -1,4 +1,5 @@
 export enum BodyType {
+    NONE,
     PLAYER,
     GROUND,
     DIST_BOX,
