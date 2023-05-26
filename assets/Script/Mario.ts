@@ -40,7 +40,7 @@ export default class Mario extends cc.Component implements MovementRef {
     private init_pos: cc.Vec2 = null;
     private winned = false;
     private anim: cc.Animation = null;
-    private onGround: boolean = false;
+    private onGround: number = 0;
     private inDistBox: boolean = false;
     private animeName: string = null;
     private audioID: number = null;
@@ -194,6 +194,7 @@ export default class Mario extends cc.Component implements MovementRef {
         } else if (anim === 'MarioJump' && this.onGround) {
             _play(anim);
             this.playEffect(this.jumpClip);
+            this.onGround = 0;
         }
     }
     
@@ -341,7 +342,7 @@ export default class Mario extends cc.Component implements MovementRef {
         case BodyType.GROUND:
             if (contact.getWorldManifold().normal.y !== -1)
                 return;
-            this.onGround = true;
+            ++this.onGround;
             break;
         case BodyType.DIST_BOX:
             // forbid collision along x-axis & y-axis from button
@@ -370,7 +371,6 @@ export default class Mario extends cc.Component implements MovementRef {
         case BodyType.ENEMY:
             if (contact.getWorldManifold().normal.y === -1) {
                 // jump after kill enemy
-                // this.jump(this.getComponent(cc.RigidBody));
                 let rigid = this.getComponent(cc.RigidBody);
                 rigid.linearVelocity = cc.v2(rigid.linearVelocity.x, Mario.jump_speed);
                 this.playEffect(this.kickClip);
@@ -395,7 +395,7 @@ export default class Mario extends cc.Component implements MovementRef {
                 return;
             }
             if (contact.getWorldManifold().normal.y === -1 && !this.inDistBox)
-                this.onGround = true;
+                ++this.onGround;
             // cc.log(contact.getWorldManifold().normal.x, contact.getWorldManifold().normal.y)
             break;
         case BodyType.POWER_UP_MUSH:
@@ -414,11 +414,11 @@ export default class Mario extends cc.Component implements MovementRef {
     {
         switch (other.tag) {
         case BodyType.GROUND:
-            this.onGround = false;
+            this.onGround = Math.max(this.onGround, 0);
             break;
         case BodyType.DIST_BOX:
             this.inDistBox = false;
-            this.onGround = false;
+            this.onGround = Math.max(this.onGround, 0);
             break;
         }
     }
