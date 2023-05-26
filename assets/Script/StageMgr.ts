@@ -6,8 +6,7 @@
 //  - https://docs.cocos.com/creator/manual/en/scripting/life-cycle-callbacks.html
 
 import { BodyType } from "../Function/BodyType";
-import { email2uid, getDefaultUserInfo, updateUserInfo, userInfo } from "../Function/auth";
-import { firebaseUpdateScore } from "../Function/database";
+import { email2uid, getDefaultUserInfo, updateRankList, updateUserInfo, userInfo } from "../Function/auth";
 import Mario from "./Mario";
 
 const {ccclass, property} = cc._decorator;
@@ -126,7 +125,7 @@ export default class StageMgr extends cc.Component {
         // initialize game index
         if (userInfo.info) {
             this.coinNum = userInfo.info.coin;
-            this.score = userInfo.info.coin;
+            this.score = userInfo.info.score;
             this.life = userInfo.info.life;
             this.timer = userInfo.info.time;
         } else {
@@ -293,7 +292,7 @@ export default class StageMgr extends cc.Component {
                     this.healMushroomPrefab
                 );
                 questBox.node.addChild(prefab);
-                prefab.setPosition(cc.v2(5, 5));
+                prefab.setPosition(cc.v2(5, 8));
 
                 // set physics collider tag
                 let mushroomPhy = prefab.getComponent(cc.PhysicsCollider);
@@ -360,7 +359,7 @@ export default class StageMgr extends cc.Component {
                 
                 itemAction = cc.sequence(
                     cc.spawn(
-                        cc.moveBy(0.1, 0, 12),
+                        cc.moveBy(0.1, 0, 9),
                         cc.blink(1, 8)
                     ),
                     cc.callFunc(() => {
@@ -508,6 +507,8 @@ export default class StageMgr extends cc.Component {
             case BodyType.ENEMY:
                 if (isRotating) {
                     otherCollider.enabled = false;
+                    otherCollider.sensor = true;
+                    this.score += 100;
                 }
                 contact.disabled = true;
                 break;
@@ -550,19 +551,20 @@ export default class StageMgr extends cc.Component {
     }
 
     win() {
-        let finalScore = Math.ceil(this.score +
-            Math.ceil(this.timer) * 10).toString();
-        this.resScoreLabel.string = finalScore;
+        // let finalScore
+        let finalScore = Math.ceil(this.score + Math.ceil(this.timer) * 10);
+        this.resScoreLabel.string = finalScore.toString();
         this.resTimerNumLabel.string = this.timerNumLabel.string;
         this.resultNode.active = true;
         this.winned = true;
         this.scheduleOnce(() => {
+            this.score = finalScore;
+            this.safePoint();
             cc.director.loadScene('ChooseStage');
         }, 8);
         this.mainMario.win();
         cc.audioEngine.stopAll();
         this.playEffect(this.levelClearClip);
-        this.safePoint();
     }
 
     // save to firebase
@@ -575,16 +577,22 @@ export default class StageMgr extends cc.Component {
                     updateUserInfo(getDefaultUserInfo(
                         userInfo.info.email, userInfo.info.username));
                 } else { // win
-                    updateUserInfo({
-                        ...userInfo.info,
-                        life: this.life,
-                        coin: this.coinNum,
-                        score: this.score,
-                        time: this.timer
-                    });
                     // upload score if has higher score rank
-                    if (userInfo.info.score < this.score)
-                        firebaseUpdateScore(email2uid(userInfo.info.email), this.score)
+                    if (userInfo.info.score < this.score) {
+                        updateRankList({
+                            uid: email2uid(userInfo.info.email), 
+                            username: userInfo.info.username,
+                            score: this.score
+                        });
+                        updateUserInfo({
+                            ...userInfo.info,
+                            life: this.life,
+                            coin: this.coinNum,
+                            score: this.score,
+                            time: this.timer,
+                            stage: this.worldNum,
+                        });
+                    }
                 }
             }
         });
