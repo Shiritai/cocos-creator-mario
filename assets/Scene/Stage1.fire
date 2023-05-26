@@ -8070,8 +8070,8 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        5.403,
-        4.993,
+        5,
+        5,
         0,
         0,
         0,
@@ -10494,7 +10494,7 @@
     },
     "_size": {
       "__type__": "cc.Size",
-      "width": 12,
+      "width": 10,
       "height": 15.6
     },
     "_id": "3dbfQE8VJINZaEO1GIzIVK"
