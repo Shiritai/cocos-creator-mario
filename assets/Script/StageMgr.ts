@@ -22,38 +22,13 @@ export default class StageMgr extends cc.Component {
     static readonly initTimerValue = 300;
     static readonly scoreStrLength = 6;
     static readonly mushroomSpeed = 150;
-    static readonly enemySpeed = 100;
+    static readonly goombaSpeed = 100;
+    static readonly turtleWalkSpeed = 70;
+    static readonly turtleRotSpeed = 210;
     user: string;
     email: string;
     coin: any;
 
-    static setUpPreSolveForEnemyWanderer(enemyRigid: cc.RigidBody, isDeadRef: { isDead: boolean }) {
-        enemyRigid.linearVelocity = cc.v2(-StageMgr.enemySpeed, 0);
-        enemyRigid.onPreSolve = (
-            contact: cc.PhysicsContact,
-            selfCollider: cc.PhysicsCollider,
-            otherCollider: cc.PhysicsCollider) => 
-        {
-            if (isDeadRef.isDead) return;
-            switch (otherCollider.tag) {
-            case BodyType.ENEMY:
-                contact.disabled = true;
-                break;
-            }
-            if (Math.abs(enemyRigid.linearVelocity.x) != StageMgr.enemySpeed &&
-                Math.abs(contact.getWorldManifold().normal.x) == 1)
-            {
-                enemyRigid.linearVelocity = cc.v2(
-                    contact.getWorldManifold().normal.x < 0 ?
-                        StageMgr.enemySpeed : -StageMgr.enemySpeed,
-                    enemyRigid.linearVelocity.y
-                );
-                contact.disabled = true;
-            }
-            contact.setFriction(0);
-        }
-    }
-    
     // game index members
     coinNum: number = 0;
     score: number = 0;
@@ -127,6 +102,9 @@ export default class StageMgr extends cc.Component {
     
     @property({type: cc.Node})
     flowers: cc.Node = null;
+    
+    @property({type: cc.Node})
+    turtles: cc.Node = null;
     
     @property({type: cc.Node})
     deadFloor: cc.Node = null;
@@ -210,6 +188,9 @@ export default class StageMgr extends cc.Component {
         
         for (let flower of this.flowers.getComponentsInChildren(cc.Component))
             this.setUpFlower(flower);
+        
+        for (let turtle of this.turtles.getComponentsInChildren(cc.Component))
+            this.setUpTurtle(turtle);
     }
 
     update (dt: number) {
@@ -396,7 +377,7 @@ export default class StageMgr extends cc.Component {
 
     setUpGoomba(gb: cc.Component) {
         let rigid = gb.getComponent(cc.RigidBody);
-        rigid.linearVelocity = cc.v2(-StageMgr.enemySpeed, 0);
+        rigid.linearVelocity = cc.v2(-StageMgr.goombaSpeed, 0);
         let isDead = false;
         rigid.onBeginContact = (
             contact: cc.PhysicsContact,
@@ -423,31 +404,29 @@ export default class StageMgr extends cc.Component {
                 break;
             }
         }
-        StageMgr.setUpPreSolveForEnemyWanderer(rigid, { isDead: isDead });
-        // rigid.onPreSolve = 
-        // (
-        //     contact: cc.PhysicsContact,
-        //     selfCollider: cc.PhysicsCollider,
-        //     otherCollider: cc.PhysicsCollider) => 
-        // {
-        //     if (isDead) return;
-        //     switch (otherCollider.tag) {
-        //     case BodyType.ENEMY:
-        //         contact.disabled = true;
-        //         break;
-        //     }
-        //     if (Math.abs(rigid.linearVelocity.x) != StageMgr.enemySpeed &&
-        //         Math.abs(contact.getWorldManifold().normal.x) == 1)
-        //     {
-        //         rigid.linearVelocity = cc.v2(
-        //             contact.getWorldManifold().normal.x < 0 ?
-        //                 StageMgr.enemySpeed : -StageMgr.enemySpeed,
-        //             rigid.linearVelocity.y
-        //         );
-        //         contact.disabled = true;
-        //     }
-        //     contact.setFriction(0);
-        // }
+        rigid.onPreSolve = (
+            contact: cc.PhysicsContact,
+            selfCollider: cc.PhysicsCollider,
+            otherCollider: cc.PhysicsCollider) => 
+        {
+            if (isDead) return;
+            switch (otherCollider.tag) {
+            case BodyType.ENEMY:
+                contact.disabled = true;
+                break;
+            }
+            if (Math.abs(rigid.linearVelocity.x) != StageMgr.goombaSpeed &&
+                Math.abs(contact.getWorldManifold().normal.x) == 1)
+            {
+                rigid.linearVelocity = cc.v2(
+                    contact.getWorldManifold().normal.x < 0 ?
+                        StageMgr.goombaSpeed : -StageMgr.goombaSpeed,
+                    rigid.linearVelocity.y
+                );
+                contact.disabled = true;
+            }
+            contact.setFriction(0);
+        }
     }
 
     setUpFlower(flower: cc.Component) {
@@ -481,6 +460,93 @@ export default class StageMgr extends cc.Component {
             cc.moveBy(2, cc.v2(0, 0)), // stall
         ).repeatForever();
         flower.node.runAction(flowerAction);
+    }
+
+    setUpTurtle(turtle: cc.Component) {
+        let rigid = turtle.getComponent(cc.RigidBody);
+        rigid.linearVelocity = cc.v2(-StageMgr.turtleWalkSpeed, 0);
+        let isDead = false;
+        let isRotating = false;
+        let turtleSpeed = StageMgr.turtleWalkSpeed;
+        rigid.onBeginContact = (
+            contact: cc.PhysicsContact,
+            selfCollider: cc.PhysicsCollider,
+            otherCollider: cc.PhysicsCollider) => 
+        {
+            switch (otherCollider.tag) {
+            case BodyType.PLAYER:
+                if (contact.getWorldManifold().normal.y === 1 && !isDead && !isRotating) {
+                    this.score += 100;
+                    if (!isDead) {
+                        let turtleAnim = turtle.getComponent(cc.Animation);
+                        turtleAnim.play("TurtleDead");
+                        isDead = true;
+                        turtleSpeed = 0;
+                        rigid.linearVelocity = cc.v2(0, rigid.linearVelocity.y);
+                    }
+                } else if (contact.getWorldManifold().normal.y !== 1 && (!isDead || isRotating)) {
+                    this.loseOneLifeForCurrentMario(false);
+                } else { // stall, ready to rotate
+                    this.score += 100;
+                    let turtleAnim = turtle.getComponent(cc.Animation);
+                    turtleAnim.play("TurtleRotate");
+                    isRotating = true;
+                    turtleSpeed = StageMgr.turtleRotSpeed;
+                    let initSpeed = turtleSpeed;
+                    if (selfCollider.node.convertToWorldSpaceAR(
+                            selfCollider.node.getPosition()).x
+                        < otherCollider.node.convertToWorldSpaceAR(
+                            otherCollider.node.getPosition()).x)
+                    {
+                        // turtle <-> mario
+                        initSpeed = -initSpeed;
+                    } // else { initSpeed = initSpeed; }
+                    rigid.linearVelocity = cc.v2(initSpeed, rigid.linearVelocity.y);
+                }
+                contact.disabled = true;
+                break;
+            case BodyType.ENEMY:
+                if (isRotating) {
+                    otherCollider.enabled = false;
+                }
+                contact.disabled = true;
+                break;
+            case BodyType.DEAD_FLOOR:
+                rigid.destroy();
+                break;
+            }
+        }
+        rigid.onPreSolve = (
+            contact: cc.PhysicsContact,
+            selfCollider: cc.PhysicsCollider,
+            otherCollider: cc.PhysicsCollider) => 
+        {
+            switch (otherCollider.tag) {
+            case BodyType.ENEMY:
+                contact.disabled = true;
+                return;
+            }
+
+            if (Math.abs(rigid.linearVelocity.x) != turtleSpeed &&
+                Math.abs(contact.getWorldManifold().normal.x) == 1)
+            {
+                if (contact.getWorldManifold().normal.x < 0) {
+                    rigid.linearVelocity = cc.v2(
+                        turtleSpeed,
+                        rigid.linearVelocity.y
+                    );
+                    turtle.node.setScale(cc.v2(-1, turtle.node.scaleY));
+                } else {
+                    rigid.linearVelocity = cc.v2(
+                        -turtleSpeed,
+                        rigid.linearVelocity.y
+                    );
+                    turtle.node.setScale(cc.v2(1, turtle.node.scaleY));
+                }
+                contact.disabled = true;
+            }
+            contact.setFriction(0);
+        }
     }
 
     win() {
