@@ -15,7 +15,6 @@ const {ccclass, property} = cc._decorator;
 @ccclass
 export default class Mario extends cc.Component implements MovementRef {
 
-    private static init_pos: cc.Vec2 = null;
     private static readonly move_speed = 200;
     private static readonly move_run_acc = 600;
     private static readonly jump_speed = 850;
@@ -37,7 +36,8 @@ export default class Mario extends cc.Component implements MovementRef {
      * 金身, won't get hurt state
      */
     golden: boolean = false;
-    
+
+    private init_pos: cc.Vec2 = null;
     private winned = false;
     private anim: cc.Animation = null;
     private onGround: boolean = false;
@@ -75,8 +75,8 @@ export default class Mario extends cc.Component implements MovementRef {
     }
 
     start () {
-        if (!Mario.init_pos) {
-            Mario.init_pos = this.node.getPosition();
+        if (!this.init_pos) {
+            this.init_pos = this.node.getPosition();
         }
         cc.audioEngine.playMusic(this.BGM, true);
         
@@ -89,7 +89,7 @@ export default class Mario extends cc.Component implements MovementRef {
         this.usernameLabel.string = username.toUpperCase();
         addUserInfoUpdatedCallback((info: UserInfo) => {
             this.usernameLabel.string = info.username.toUpperCase();
-        })
+        });
     }
 
     update (dt: number) {
@@ -185,17 +185,14 @@ export default class Mario extends cc.Component implements MovementRef {
             this.animeName = anim;
             let animName = this.powerUp ? "Big" + anim : anim;
             this.anim.play(animName)
-            // cc.log(animName);
         };
         if (anim !== this.animeName && !this.anim.getAnimationState(anim).isPlaying) {
             _play(anim);
-            // this.animeName = this.anim.play(anim).name;
             if (clip) {
                 this.playEffect(clip);
             }
         } else if (anim === 'MarioJump' && this.onGround) {
             _play(anim);
-            // this.animeName = this.anim.play(anim).name;
             this.playEffect(this.jumpClip);
         }
     }
@@ -262,7 +259,7 @@ export default class Mario extends cc.Component implements MovementRef {
         this.playGotHurt(() => {
             this.scheduleOnce(() => {
                 this.getComponent(cc.PhysicsCollider).enabled = true;
-                this.node.setPosition(Mario.init_pos);
+                this.node.setPosition(this.init_pos);
                 cc.audioEngine.playMusic(this.BGM, true);
             });
         });
@@ -355,7 +352,6 @@ export default class Mario extends cc.Component implements MovementRef {
                 this.inDistBox = true;
                 return;
             }
-            // cc.log(contact.getWorldManifold().normal.x, contact.getWorldManifold().normal.y)
             break;
         case BodyType.DEAD_FLOOR:
             // does nothing now
