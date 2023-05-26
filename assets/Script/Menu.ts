@@ -12,24 +12,18 @@ export default class Menu extends cc.Component {
 
     @property({type:cc.AudioClip})
     BGM: cc.AudioClip = null;
-
+    
     start() {
-        this.playBGM();
-    }
-
-    playBGM(){
         cc.audioEngine.playMusic(this.BGM, true);
     }
 
-    stopBGM(){
-        cc.audioEngine.pauseMusic();
-    }
-
     signUp() {
+        cc.audioEngine.stopMusic();
         cc.director.loadScene("SignUp");
     }
 
     logIn() {
+        cc.audioEngine.stopMusic();
         cc.director.loadScene("LogIn");
     }
 }
