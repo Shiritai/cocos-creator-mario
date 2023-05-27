@@ -10,8 +10,12 @@ import { RankItem, UserInfo, addRankListUpdatedCallback, addUserInfoUpdatedCallb
 const {ccclass, property} = cc._decorator;
 
 @ccclass
-export default class NewClass extends cc.Component {
+export default class ChooseStage extends cc.Component {
 
+    static stageChoice: number;
+    static isMultiPlayerChoice: boolean = false;
+    static readonly sceneName = "LoadStage";
+    
     @property(cc.AudioClip)
     BGM: cc.AudioClip = null;
 
@@ -109,25 +113,19 @@ export default class NewClass extends cc.Component {
         this.rankList.active = !this.rankList.active;
     }
 
-    private loadStage(stageCount: number, scene: string) {
+    loadStage(_: cc.Event, stageCount: number) {
         if (!userInfo.info) {
             alert(`You haven\'t signed in, but you can try stage ${stageCount} :)`);
-            cc.director.loadScene(scene);
+            ChooseStage.stageChoice = stageCount;
+            cc.director.loadScene(ChooseStage.sceneName);
         } else {
             let availStageCount = userInfo.info.stage + 1;
             if (availStageCount >= stageCount) {
-                cc.director.loadScene(scene);
+                ChooseStage.stageChoice = stageCount;
+                cc.director.loadScene(ChooseStage.sceneName);
             } else {
                 alert(`You can\'t play this stage, please clear the former stage: ${availStageCount} first :)`);
             }
         }
-    }
-
-    loadStage1() {
-        this.loadStage(1, 'LoadStage1')
-    }
-    
-    loadStage2() {
-        this.loadStage(2, 'LoadStage2')
     }
 }

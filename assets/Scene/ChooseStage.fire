@@ -795,8 +795,8 @@
     },
     "component": "",
     "_componentId": "7d6b9ToxeVPfpwJuTM0CM5G",
-    "handler": "loadStage1",
-    "customEventData": ""
+    "handler": "loadStage",
+    "customEventData": "1"
   },
   {
     "__type__": "cc.Widget",
@@ -1251,8 +1251,8 @@
     },
     "component": "",
     "_componentId": "7d6b9ToxeVPfpwJuTM0CM5G",
-    "handler": "loadStage2",
-    "customEventData": ""
+    "handler": "loadStage",
+    "customEventData": "2"
   },
   {
     "__type__": "cc.Widget",
