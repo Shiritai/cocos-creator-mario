@@ -6,8 +6,9 @@
 //  - https://docs.cocos.com/creator/manual/en/scripting/life-cycle-callbacks.html
 
 import { BodyType } from "../Function/BodyType";
-import { email2uid, getDefaultUserInfo, updateRankList, updateUserInfo, userInfo } from "../Function/auth";
+import { KeyControl, email2uid, getDefaultUserInfo, updateRankList, updateUserInfo, userInfo } from "../Function/types";
 import Mario from "./Mario";
+import PlayerCamera from "./PlayerCamera";
 
 const {ccclass, property} = cc._decorator;
 
@@ -101,9 +102,6 @@ export default class StageMgr extends cc.Component {
 
     @property({type: cc.AudioClip})
     levelClearClip: cc.AudioClip = null;
-    
-    @property({type: Mario})
-    mainMario: Mario = null;
     
     @property({type: cc.Node})
     coins: cc.Node = null;
@@ -386,12 +384,13 @@ export default class StageMgr extends cc.Component {
                     otherCollider: cc.PhysicsCollider) => 
                 {
                     if (otherCollider.tag == BodyType.BARRIER ||
-                        otherCollider.tag == BodyType.ENEMY || !eatable)
+                        otherCollider.tag == BodyType.ENEMY ||
+                        !eatable || contacted)
                     {
                         contact.disabled = true;
                         return;
                     }
-                    if (otherCollider.node.name !== 'Mario' || contacted)
+                    if (otherCollider.node.name !== 'Mario')
                         return;
                     contacted = true;
                     mushroomRigid.linearVelocity = cc.v2(0, 0);
@@ -460,6 +459,7 @@ export default class StageMgr extends cc.Component {
                     this.score += 100;
                     let goombaAnim = gb.getComponent(cc.Animation);
                     goombaAnim.play("GoombaDead");
+                    rigid.linearVelocity = cc.v2(0, 0);
                     isDead = true;
                     goombaAnim.once('finished', () => {
                         gb.node.active = false;
@@ -538,6 +538,7 @@ export default class StageMgr extends cc.Component {
         rigid.linearVelocity = cc.v2(-StageMgr.turtleWalkSpeed, 0);
         let isDead = false;
         let isRotating = false;
+        let kicked = false;
         let turtleSpeed = StageMgr.turtleWalkSpeed;
         rigid.onBeginContact = (
             contact: cc.PhysicsContact,
@@ -559,7 +560,10 @@ export default class StageMgr extends cc.Component {
                     this.loseOneLifeForCurrentMario(
                         otherCollider.node.getComponent('Mario'), false);
                 } else { // stall, ready to rotate
-                    this.score += 100;
+                    if (!kicked) {
+                        this.score += 100;
+                        kicked = true;
+                    }
                     let turtleAnim = turtle.getComponent(cc.Animation);
                     turtleAnim.play("TurtleRotate");
                     isRotating = true;
