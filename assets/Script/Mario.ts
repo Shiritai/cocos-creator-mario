@@ -201,7 +201,6 @@ export default class Mario extends cc.Component implements MovementRef {
         } else if (anim === 'MarioJump' && this.onGround) {
             _play(anim);
             this.playEffect(this.jumpClip);
-            this.onGround = 0;
         }
     }
     
@@ -401,8 +400,10 @@ export default class Mario extends cc.Component implements MovementRef {
                 this.inDistBox = true;
                 return;
             }
-            if (contact.getWorldManifold().normal.y === -1 && !this.inDistBox)
+            if (contact.getWorldManifold().normal.y === -1 && !this.inDistBox) {
                 ++this.onGround;
+                this.inDistBox = true;
+            }
             // cc.log(contact.getWorldManifold().normal.x, contact.getWorldManifold().normal.y)
             break;
         case BodyType.POWER_UP_MUSH:
@@ -421,11 +422,11 @@ export default class Mario extends cc.Component implements MovementRef {
     {
         switch (other.tag) {
         case BodyType.GROUND:
-            this.onGround = Math.max(this.onGround, 0);
+            this.onGround = Math.max(this.onGround - 1, 0);
             break;
         case BodyType.DIST_BOX:
             this.inDistBox = false;
-            this.onGround = Math.max(this.onGround, 0);
+            this.onGround = Math.max(this.onGround - 1, 0);
             break;
         }
     }
