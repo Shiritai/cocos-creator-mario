@@ -6,6 +6,7 @@
 //  - https://docs.cocos.com/creator/manual/en/scripting/life-cycle-callbacks.html
 
 import ChooseStage from "./ChooseStage";
+import StageMgr from "./StageMgr";
 
 const {ccclass, property} = cc._decorator;
 
@@ -23,17 +24,37 @@ export default class LoadScene extends cc.Component {
 
     @property(cc.Label)
     readyCount: cc.Label;
+
+    @property(cc.Button)
+    readyButton: cc.Button;
     
     @property
     delay = 2;
 
     start() {
-        if (ChooseStage.isMultiPlayerChoice) { // multiplayer mode
-
-        } else {
-            this.stageCount.string = ChooseStage.stageChoice.toString();
-            this.schedule(_ => { cc.director
-                .loadScene(`Stage${ChooseStage.stageChoice}`) }, this.delay)
+        if (!ChooseStage.stageChoice || StageMgr.playMode.mode === 'None') {
+            cc.log('Please choose a stage');
+            this.scheduleOnce(() => { cc.director
+                .loadScene('ChooseStage') }, this.delay);
+            return;
         }
+
+        switch (StageMgr.playMode.mode) {
+        case "RemoteMultiple":
+            alert('Not implemented');
+            break;
+        case "LocalMultiple":
+            this.multiPlayerInfo.active = true;
+            this.readyButton.node.active = false;
+            this.waitingCount.string = this.readyCount.string =
+                StageMgr.playMode.payload.toString();
+            break;
+        case 'Single':
+            break;
+        }
+
+        this.stageCount.string = ChooseStage.stageChoice.toString();
+        this.scheduleOnce(() => { cc.director
+            .loadScene(`Stage${ChooseStage.stageChoice}`) }, this.delay);
     }
 }

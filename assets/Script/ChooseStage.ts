@@ -5,7 +5,8 @@
 // Learn life-cycle callbacks:
 //  - https://docs.cocos.com/creator/manual/en/scripting/life-cycle-callbacks.html
 
-import { RankItem, UserInfo, addRankListUpdatedCallback, addUserInfoUpdatedCallback, rankList, removeRankListUpdatedCallback, removeUserInfoUpdatedCallback, userInfo } from "../Function/auth";
+import { RankItem, UserInfo, addRankListUpdatedCallback, addUserInfoUpdatedCallback, rankList, removeRankListUpdatedCallback, removeUserInfoUpdatedCallback, userInfo } from "../Function/types";
+import StageMgr from "./StageMgr";
 
 const {ccclass, property} = cc._decorator;
 
@@ -13,7 +14,6 @@ const {ccclass, property} = cc._decorator;
 export default class ChooseStage extends cc.Component {
 
     static stageChoice: number;
-    static isMultiPlayerChoice: boolean = false;
     static readonly sceneName = "LoadStage";
     
     @property(cc.AudioClip)
@@ -113,7 +113,7 @@ export default class ChooseStage extends cc.Component {
         this.rankList.active = !this.rankList.active;
     }
 
-    loadStage(_: cc.Event, stageCount: number) {
+    loadStageProcess(stageCount: number) {
         if (!userInfo.info) {
             alert(`You haven\'t signed in, but you can try stage ${stageCount} :)`);
             ChooseStage.stageChoice = stageCount;
@@ -126,6 +126,32 @@ export default class ChooseStage extends cc.Component {
             } else {
                 alert(`You can\'t play this stage, please clear the former stage: ${availStageCount} first :)`);
             }
+        }
+    }
+
+    loadStage(_: cc.Event, stageCount: number) {
+        StageMgr.playMode = { mode: 'Single' };
+        this.loadStageProcess(stageCount);
+    }
+
+    loadLocalMultiplayerStage(_: cc.Event, stageCount: number) {
+        let nPlayers = prompt('How many players (at most 4)');
+        try {
+            let n = Number(nPlayers);
+            if (n <= 4 && n >= 1) {
+                StageMgr.playMode = {
+                    mode: 'LocalMultiple',
+                    payload: n
+                };
+                cc.log(`There are ${n} players`);
+                this.loadStageProcess(stageCount);
+            } else {
+                alert(`Invalid player number: ${nPlayers}, please try again`);
+                return; // ignore
+            }
+        } catch {
+            alert(`Invalid player number: ${nPlayers}, please try again`);
+            return; // ignore
         }
     }
 }
