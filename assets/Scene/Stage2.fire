@@ -329,7 +329,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 1920,
-      "height": 367.99999999720603
+      "height": 367.999999998603
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -22143,8 +22143,8 @@
     "_alignFlags": 13,
     "_left": -0.3109999999999218,
     "_right": 0,
-    "_top": -96.21199999720609,
-    "_bottom": 0.2120000027939355,
+    "_top": -96.21199999860308,
+    "_bottom": 0.21200000139695163,
     "_verticalCenter": 0,
     "_horizontalCenter": 0,
     "_isAbsLeft": true,
@@ -22169,7 +22169,7 @@
         "__id__": 689
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 691
@@ -24879,9 +24879,6 @@
       "__id__": 703
     },
     "_enabled": true,
-    "mainMario": {
-      "__id__": 695
-    },
     "_id": "b78MrQwq9FEK/EiQXTJB3l"
   },
   {
@@ -24936,6 +24933,9 @@
       "__id__": 2
     },
     "_enabled": true,
+    "camera": {
+      "__id__": 745
+    },
     "worldNum": 2,
     "worldNumLabel": {
       "__id__": 708
@@ -24970,9 +24970,6 @@
     "levelClearClip": {
       "__uuid__": "5b64e5a6-fe39-4635-bf5a-901beab9aeef"
     },
-    "mainMario": {
-      "__id__": 695
-    },
     "coins": {
       "__id__": 133
     },
@@ -24999,6 +24996,9 @@
     },
     "flag": {
       "__id__": 129
+    },
+    "marioPrefab": {
+      "__uuid__": "df340094-0e74-46f1-bbec-43b5a40ab3b7"
     },
     "coinPrefab": {
       "__uuid__": "954488c1-b75e-4df2-bd02-326ea41703e3"
