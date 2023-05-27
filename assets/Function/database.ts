@@ -1,4 +1,4 @@
-import { RankItem, UserInfo, addUserInfoUpdatedCallback, rankList, updateRankList, updateUserInfo, userInfo } from "./auth";
+import { UserInfo, addUserInfoUpdatedCallback, updateRankList, updateUserInfo, userInfo } from "./types";
 
 export function firebaseSetUserInfo(uid: string): Promise<void> {
     return firebase.database().ref(`users/${uid}`).set(userInfo.info);
@@ -25,7 +25,7 @@ export function firebaseAssignUpdateCallback(uid: string) {
     addUserInfoUpdatedCallback(updateToFirebase);
 }
 
-export function firebaseOnUserInfoUpdateRankList() {
+export function firebaseOnUpdateRankList() {
     firebase.database().ref(`scores/`)
         .on('value', (snapshot) => {
             if (snapshot.exists()) {
@@ -39,6 +39,17 @@ export function firebaseOnUserInfoUpdateRankList() {
                 cc.log('Load rankList from firebase');
             } else {
                 console.log("No list available");
+            }
+        })
+}
+
+export function firebaseOnUpdateMarios(stage: string) {
+    firebase.database().ref(`${stage}/marios`)
+        .on('value', (snapshot) => {
+            if (snapshot.exist()) {
+                snapshot.forEach(mario => {
+                    
+                })
             }
         })
 }

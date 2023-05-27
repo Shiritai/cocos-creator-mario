@@ -5,8 +5,8 @@
 // Learn life-cycle callbacks:
 //  - https://docs.cocos.com/creator/manual/en/scripting/life-cycle-callbacks.html
 
-import { email2uid, getDefaultUserInfo, userInfo } from "../Function/auth";
-import { firebaseAssignUpdateCallback, firebaseOnUserInfoUpdateRankList, firebaseOnUpdateUserInfo, firebaseSetUserInfo } from "../Function/database";
+import { email2uid, getDefaultUserInfo, userInfo } from "../Function/types";
+import { firebaseAssignUpdateCallback, firebaseOnUpdateRankList, firebaseOnUpdateUserInfo, firebaseSetUserInfo } from "../Function/database";
 
 const {ccclass, property} = cc._decorator;
 
@@ -45,7 +45,7 @@ export default class SignUp extends cc.Component {
                         alert(error.message); 
                     });
                 firebaseAssignUpdateCallback(uid);
-                firebaseOnUserInfoUpdateRankList();
+                firebaseOnUpdateRankList();
             })
             .catch((error: Error) => { 
                 alert(error.message); 

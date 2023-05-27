@@ -5,8 +5,8 @@
 // Learn life-cycle callbacks:
 //  - https://docs.cocos.com/creator/manual/en/scripting/life-cycle-callbacks.html
 
-import { email2uid } from "../Function/auth";
-import { firebaseAssignUpdateCallback, firebaseOnUserInfoUpdateRankList, firebaseOnUpdateUserInfo } from "../Function/database";
+import { email2uid } from "../Function/types";
+import { firebaseAssignUpdateCallback, firebaseOnUpdateRankList, firebaseOnUpdateUserInfo } from "../Function/database";
 
 const {ccclass, property} = cc._decorator;
 
@@ -30,9 +30,10 @@ export default class LogIn extends cc.Component {
         firebase.auth()
             .signInWithEmailAndPassword(email, password)
             .then(() => {
+                cc.log(`uid: ${uid}`);
                 firebaseOnUpdateUserInfo(uid);
                 firebaseAssignUpdateCallback(uid);
-                firebaseOnUserInfoUpdateRankList();
+                firebaseOnUpdateRankList();
                 alert("Logged in successfully");
                 cc.director.loadScene("ChooseStage");
             })
