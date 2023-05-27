@@ -12,8 +12,11 @@ const {ccclass, property} = cc._decorator;
 @ccclass
 export default class PlayerCamera extends cc.Component {
 
-    @property({type: Mario})
     mainMario: Mario = null;
+    
+    checkoutMario(mario: Mario) {
+        this.mainMario = mario;
+    }
     
     update () {
         if (this.mainMario && !this.mainMario.isDying) {

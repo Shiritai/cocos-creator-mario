@@ -8,7 +8,8 @@
 import { BodyType } from "../Function/BodyType";
 import { Movement, MovementRef, resetAll, resetLeft, resetRight, resetUp, setLeft, setRight, setUp } from "../Function/Movement";
 import { serialize } from "../Function/Serialize";
-import { UserInfo, addUserInfoUpdatedCallback, removeUserInfoUpdatedCallback, userInfo } from "../Function/auth";
+import { KeyControl, UserInfo, addUserInfoUpdatedCallback, email2uid, removeUserInfoUpdatedCallback, userInfo } from "../Function/types";
+import StageMgr from "./StageMgr";
 
 const {ccclass, property} = cc._decorator;
 
@@ -20,6 +21,7 @@ export default class Mario extends cc.Component implements MovementRef {
     private static readonly jump_speed = 850;
     
     // members
+    uid: string = "invalidUID";
     /**
      * Whether is playing dying anime
      */
@@ -37,15 +39,19 @@ export default class Mario extends cc.Component implements MovementRef {
      */
     golden: boolean = false;
 
+    onGround: number = 0;
+    inDistBox: boolean = false;
+    
+    animeName: string = null;
+    audioID: number = null;
+    
     private init_pos: cc.Vec2 = null;
     private winned = false;
     private anim: cc.Animation = null;
-    private onGround: number = 0;
-    private inDistBox: boolean = false;
-    private animeName: string = null;
-    private audioID: number = null;
+    // stageMgr: StageMgr = null;
 
     // properties
+    
     @property({type: cc.Label})
     usernameLabel: cc.Label = null;
 
@@ -67,28 +73,48 @@ export default class Mario extends cc.Component implements MovementRef {
     @property({type: cc.AudioClip})
     powerDownClip: cc.AudioClip = null;
 
+    keyControl: KeyControl = {
+        left: -1,
+        right: -1,
+        up: -1
+    };
+    
     onLoad () {
         cc.director.getPhysicsManager().enabled = true;
         this.anim = this.getComponent(cc.Animation);
-        cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
-        cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
     }
-
+    
     start () {
+        this.getComponent(cc.PhysicsCollider).tag = BodyType.PLAYER;
+        cc.audioEngine.playMusic(this.BGM, true);
         if (!this.init_pos) {
             this.init_pos = this.node.getPosition();
         }
-        cc.audioEngine.playMusic(this.BGM, true);
-        
+    }
+    
+    initializeMainMario() {
+        // bind system keyboard
+        this.keyControl = { ...StageMgr.localPlayerKeyMap[0] }
+        // setup members
         let username: string;
         if (userInfo.info) {
-            username = userInfo.info.username
+            this.uid = email2uid(userInfo.info.email);
+            username = userInfo.info.username;
         } else {
-            username = 'anonymous'
+            this.uid = 'invalidUID';
+            username = 'anonymous';
         }
         this.usernameLabel.string = username.toUpperCase();
         addUserInfoUpdatedCallback(this.setUpUsername);
-        this.getComponent(cc.PhysicsCollider).tag = BodyType.PLAYER;
+    }
+    
+    initializeTheOtherPlayerMario(username: string, keyControl: KeyControl) {
+        // bind system keyboard
+        this.keyControl = { ...keyControl }
+        // setup members
+        this.uid = username;
+        this.usernameLabel.string = username.toUpperCase();
+        addUserInfoUpdatedCallback(this.setUpUsername);
     }
 
     onDestroy(): void {
@@ -105,8 +131,17 @@ export default class Mario extends cc.Component implements MovementRef {
 
         if (this.winned || this.isDying)
             return; // playing dying animation
+        
+        // cc.log(`update ${this.uid}`)
         this.updateMove(dt);
         this.updateAnime();
+    }
+
+    /**
+     * Upload mario info onto firebase
+     */
+    upload() {
+        
     }
 
     /**
@@ -268,6 +303,7 @@ export default class Mario extends cc.Component implements MovementRef {
                 this.getComponent(cc.PhysicsCollider).enabled = true;
                 this.node.setPosition(this.init_pos);
                 cc.audioEngine.playMusic(this.BGM, true);
+                this.playGolden(); // golden state when reborn
             });
         });
     }
@@ -285,7 +321,7 @@ export default class Mario extends cc.Component implements MovementRef {
         this.golden = true;
         this.scheduleOnce(() => {
             this.golden = false;
-        }, 1);
+        }, 2);
     }
 
     playGotHurt(animeFinishedCallback: () => void) {
@@ -293,6 +329,7 @@ export default class Mario extends cc.Component implements MovementRef {
         this.playAnime('MarioDead');
         this.getComponent(cc.PhysicsCollider).enabled = false;
         cc.audioEngine.stopMusic();
+        cc.audioEngine.stopAllEffects();
         this.playEffect(this.loseOneLifeClip);
         this.anim.once('finished', animeFinishedCallback);
     }
@@ -306,34 +343,28 @@ export default class Mario extends cc.Component implements MovementRef {
     }
 
     onKeyDown(event: cc.Event.EventKeyboard) {
-        // cc.log(`${event.keyCode}`);
         switch (event.keyCode) {
-        case cc.macro.KEY.a:
+        case this.keyControl.left:
             setLeft(this);
             break;
-        case cc.macro.KEY.d:
+        case this.keyControl.right:
             setRight(this);
             break;
-        case cc.macro.KEY.w:
+        case this.keyControl.up:
             setUp(this);
             break;
-        default:
-            resetAll(this);
-            break;
         }
-        // cc.log(`this.move: ${this.move}`);
     }
     
     onKeyUp(event: cc.Event.EventKeyboard) {
-        // let rigid = this.getComponent(cc.RigidBody);
         switch (event.keyCode) {
-        case cc.macro.KEY.a:
+        case this.keyControl.left:
             resetLeft(this);
             break;
-        case cc.macro.KEY.d:
+        case this.keyControl.right:
             resetRight(this);
             break;
-        case cc.macro.KEY.w:
+        case this.keyControl.up:
             resetUp(this);
             break;
         }
