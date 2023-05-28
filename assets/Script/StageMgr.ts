@@ -652,7 +652,7 @@ export default class StageMgr extends cc.Component {
             if (user) {
                 if (this.life <= 0) { // game over
                     updateUserInfo(getDefaultUserInfo(
-                        userInfo.info.email, userInfo.info.username));
+                        userInfo.info.email, userInfo.info.username, this.worldNum - 1));
                 } else { // win
                     // upload score if has higher score rank
                     if (userInfo.info.score < this.score) {

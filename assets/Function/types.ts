@@ -12,7 +12,7 @@ export type UserInfo = {
     stage: number,
 }
 
-export function getDefaultUserInfo(email: string, username: string): UserInfo {
+export function getDefaultUserInfo(email: string, username: string, stage?: number): UserInfo {
     return {
         username: username,
         email: email,
@@ -20,7 +20,7 @@ export function getDefaultUserInfo(email: string, username: string): UserInfo {
         coin: 0,
         score: 0,
         time: 300,
-        stage: 0,
+        stage: stage ?? 0,
     }
 }
 
@@ -280,5 +280,6 @@ export function updateOtherMario(stage: number, uid: string, fbMario: FB_Mario) 
 export type KeyControl = {
     left: number,
     right: number,
-    up: number
+    up: number,
+    cameraSwitch: number
 };
