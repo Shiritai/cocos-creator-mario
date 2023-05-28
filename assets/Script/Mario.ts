@@ -9,6 +9,7 @@ import { BodyType } from "../Function/BodyType";
 import { Movement, MovementRef, resetAll, resetLeft, resetRight, resetUp, setLeft, setRight, setUp } from "../Function/Movement";
 import { serialize } from "../Function/Serialize";
 import { KeyControl, UserInfo, addUserInfoUpdatedCallback, email2uid, removeUserInfoUpdatedCallback, userInfo } from "../Function/types";
+import PlayerCamera from "./PlayerCamera";
 import StageMgr from "./StageMgr";
 
 const {ccclass, property} = cc._decorator;
@@ -41,13 +42,14 @@ export default class Mario extends cc.Component implements MovementRef {
 
     onGround: number = 0;
     inDistBox: boolean = false;
+    winned = false;
     
     animeName: string = null;
     audioID: number = null;
     
     private init_pos: cc.Vec2 = null;
-    private winned = false;
     private anim: cc.Animation = null;
+    private camera: PlayerCamera = null;
     // stageMgr: StageMgr = null;
 
     // properties
@@ -76,7 +78,8 @@ export default class Mario extends cc.Component implements MovementRef {
     keyControl: KeyControl = {
         left: -1,
         right: -1,
-        up: -1
+        up: -1,
+        cameraSwitch: -1
     };
     
     onLoad () {
@@ -92,9 +95,10 @@ export default class Mario extends cc.Component implements MovementRef {
         }
     }
     
-    initializeMainMario() {
+    initializeMainMario(camera: PlayerCamera) {
         // bind system keyboard
         this.keyControl = { ...StageMgr.localPlayerKeyMap[0] }
+        this.camera = camera;
         // setup members
         let username: string;
         if (userInfo.info) {
@@ -108,9 +112,10 @@ export default class Mario extends cc.Component implements MovementRef {
         addUserInfoUpdatedCallback(this.setUpUsername);
     }
     
-    initializeTheOtherPlayerMario(username: string, keyControl: KeyControl) {
+    initializeTheOtherPlayerMario(username: string, keyControl: KeyControl, camera: PlayerCamera) {
         // bind system keyboard
         this.keyControl = { ...keyControl }
+        this.camera = camera;
         // setup members
         this.uid = username;
         this.usernameLabel.string = username.toUpperCase();
@@ -352,6 +357,9 @@ export default class Mario extends cc.Component implements MovementRef {
             break;
         case this.keyControl.up:
             setUp(this);
+            break;
+        case this.keyControl.cameraSwitch:
+            this.camera.checkoutMario(this);
             break;
         }
     }

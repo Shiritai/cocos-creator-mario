@@ -12,22 +12,26 @@ const {ccclass, property} = cc._decorator;
 @ccclass
 export default class PlayerCamera extends cc.Component {
 
-    mainMario: Mario = null;
+    @property
+    yAxisValid = false;
+    
+    targetMario: Mario = null;
     
     checkoutMario(mario: Mario) {
-        this.mainMario = mario;
+        this.targetMario = mario;
     }
     
     update () {
-        if (this.mainMario && !this.mainMario.isDying) {
-            let tar_pos = this.mainMario.node.getPosition();
+        if (this.targetMario && !this.targetMario.isDying) {
+            let tar_pos = this.targetMario.node.getPosition();
             tar_pos.x = tar_pos.x > 0 ? tar_pos.x : 0;
-            tar_pos.y = tar_pos.y > 0 ? tar_pos.y : 0;
+            if (this.yAxisValid)
+                tar_pos.y = tar_pos.y > 0 ? tar_pos.y : 0;
             let new_pos = this.node.getPosition();
             new_pos.lerp(tar_pos, 0.2, new_pos);
             this.node.x = new_pos.x;
-            new_pos.lerp(tar_pos, 0.5, new_pos);
-            this.node.y = new_pos.y;
+            if (this.yAxisValid)
+                this.node.y = new_pos.y;
         }
     }
 }

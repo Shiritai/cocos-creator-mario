@@ -5428,7 +5428,7 @@
       "ctor": "Float64Array",
       "array": [
         -365.41,
-        66.865,
+        67,
         0,
         0,
         0,
@@ -6595,7 +6595,7 @@
       "ctor": "Float64Array",
       "array": [
         147.26,
-        67.114,
+        67,
         0,
         0,
         0,
@@ -7438,7 +7438,7 @@
       "ctor": "Float64Array",
       "array": [
         -348.949,
-        67.068,
+        66.772,
         0,
         0,
         0,
@@ -12351,6 +12351,7 @@
       "__id__": 309
     },
     "_enabled": true,
+    "yAxisValid": false,
     "_id": "b78MrQwq9FEK/EiQXTJB3l"
   },
   {

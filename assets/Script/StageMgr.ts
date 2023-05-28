@@ -16,6 +16,8 @@ enum QuestionBoxType {
     COIN, POWER, HEAL
 }
 
+type PlayingMode = 'None' | 'Single' | 'LocalMultiple' | 'RemoteMultiple';
+
 @ccclass
 export default class StageMgr extends cc.Component {
     
@@ -29,15 +31,15 @@ export default class StageMgr extends cc.Component {
      * Support up to four players
      */
     static readonly localPlayerKeyMap: KeyControl[] = [
-        { left: cc.macro.KEY.a, right: cc.macro.KEY.d, up: cc.macro.KEY.w },
-        { left: cc.macro.KEY.g, right: cc.macro.KEY.j, up: cc.macro.KEY.y },
-        { left: cc.macro.KEY.l, right: cc.macro.KEY.quote, up: cc.macro.KEY.p },
-        { left: cc.macro.KEY.left, right: cc.macro.KEY.right, up: cc.macro.KEY.up },
+        { left: cc.macro.KEY.a, right: cc.macro.KEY.d, up: cc.macro.KEY.w, cameraSwitch: cc.macro.KEY.s },
+        { left: cc.macro.KEY.g, right: cc.macro.KEY.j, up: cc.macro.KEY.y, cameraSwitch: cc.macro.KEY.h },
+        { left: cc.macro.KEY.l, right: cc.macro.KEY.quote, up: cc.macro.KEY.p, cameraSwitch: cc.macro.KEY[";"] },
+        { left: cc.macro.KEY.left, right: cc.macro.KEY.right, up: cc.macro.KEY.up, cameraSwitch: cc.macro.KEY.down },
     ]
 
     static stageMarioMap: Map<number, Map<string, Mario>> = new Map();
     static playMode: {
-        mode: 'None' | 'Single' | 'LocalMultiple' | 'RemoteMultiple',
+        mode: PlayingMode,
         payload?: number,
     } = { mode: 'Single' }; // default as single player mode
     
@@ -148,11 +150,16 @@ export default class StageMgr extends cc.Component {
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
         
         // initialize main mario
+        let mapIndex = 0;
+        for (mapIndex = 0; mapIndex < this.node.children.length; ++mapIndex)
+            if (this.node.children[mapIndex].name === 'Map')
+                break;
+        
         let marioPrefab = cc.instantiate(this.marioPrefab);
-        this.node.addChild(marioPrefab);
+        this.node.insertChild(marioPrefab, mapIndex + 1);
         cc.log(this.node.name);
         this.mainMario = marioPrefab.getComponent(Mario);
-        this.mainMario.initializeMainMario();
+        this.mainMario.initializeMainMario(this.camera);
         this.marioList.set(this.mainMario.uid, this.mainMario);
         this.camera.checkoutMario(this.mainMario);
 
@@ -163,11 +170,10 @@ export default class StageMgr extends cc.Component {
         case 'LocalMultiple':
             for (let i = 1; i < StageMgr.playMode.payload; ++i) {
                 let otherPrefab = cc.instantiate(this.marioPrefab);
-                this.node.addChild(otherPrefab);
+                this.node.insertChild(otherPrefab, mapIndex + 1);
                 let otherMario = otherPrefab.getComponent(Mario);
-                // otherMario.usernameLabel.string = "meow";
                 otherMario.initializeTheOtherPlayerMario(
-                    `player${i}`, StageMgr.localPlayerKeyMap[i]);
+                    `player${i}`, StageMgr.localPlayerKeyMap[i], this.camera);
                 this.marioList.set(otherMario.uid, otherMario);
             }
             break;
@@ -201,7 +207,7 @@ export default class StageMgr extends cc.Component {
         {
             if (otherCollider.node.name === 'Mario') {
                 this.loseOneLifeForCurrentMario(
-                    otherCollider.node.getComponent('Mario'), true);
+                    otherCollider.node.getComponent(Mario), true);
             }
         }
         this.flag.getComponent(cc.RigidBody).onBeginContact = (
@@ -210,7 +216,10 @@ export default class StageMgr extends cc.Component {
             otherCollider: cc.PhysicsCollider) => 
         {
             if (otherCollider.node.name === 'Mario') {
-                this.win();
+                otherCollider.node.getComponent(Mario).win();
+                // all marios wins -> win the whole game
+                if (Array.from(this.marioList.values()).every(m => m.winned))
+                    this.win();
             }
         }
         for (let coin of this.coins.getComponentsInChildren(cc.Component)) {
@@ -270,13 +279,11 @@ export default class StageMgr extends cc.Component {
     }
 
     onKeyDown(event: cc.Event.EventKeyboard) {
-        // cc.log(`Transfer: ${event.keyCode}`);
         for (let m of Array.from(this.marioList.values()))
             m.onKeyDown(event);
     }
         
     onKeyUp(event: cc.Event.EventKeyboard) {
-        // cc.log(`Transfer: ${event.keyCode}`);
         for (let m of Array.from(this.marioList.values()))
             m.onKeyUp(event);
     }
@@ -331,7 +338,7 @@ export default class StageMgr extends cc.Component {
         {
             if (otherCollider.node.name !== 'Mario' || generated)
                 return;
-            let mario: Mario = otherCollider.node.getComponent('Mario');
+            let mario: Mario = otherCollider.node.getComponent(Mario);
             let qBox = questBox.node.getChildByName('QBox');
             if (!qBox.active || mario.isDying || contact.getWorldManifold().normal.y !== -1)
                 return;
@@ -574,7 +581,7 @@ export default class StageMgr extends cc.Component {
                     }
                 } else if (contact.getWorldManifold().normal.y !== 1 && (!isDead || isRotating)) {
                     this.loseOneLifeForCurrentMario(
-                        otherCollider.node.getComponent('Mario'), false);
+                        otherCollider.node.getComponent(Mario), false);
                 } else { // stall, ready to rotate
                     if (!kicked) {
                         this.score += 100;
