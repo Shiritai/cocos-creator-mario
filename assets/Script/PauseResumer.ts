@@ -15,7 +15,7 @@ export default class PauseResumer extends cc.Component {
     rigid: cc.RigidBody = null;
     anim: cc.Animation = null;
     
-    start () {
+    start() {
         this.rigid = this.getComponent(cc.RigidBody);
         this.anim = this.getComponent(cc.Animation);
     }

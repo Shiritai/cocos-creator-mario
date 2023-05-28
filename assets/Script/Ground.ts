@@ -12,7 +12,7 @@ const {ccclass, property} = cc._decorator;
 @ccclass
 export default class Ground extends cc.Component {
 
-    start () {
+    start() {
         for (let phy of this.getComponents(cc.PhysicsCollider)) {
             phy.tag = BodyType.GROUND
         }

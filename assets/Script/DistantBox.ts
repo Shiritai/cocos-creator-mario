@@ -12,7 +12,7 @@ const {ccclass, property} = cc._decorator;
 @ccclass
 export default class DistantBox extends cc.Component {
 
-    start () {
+    start() {
         for (let phy of this.getComponents(cc.PhysicsCollider)) {
             phy.tag = BodyType.DIST_BOX
         }

@@ -7,7 +7,6 @@
 
 import { BodyType } from "../Function/BodyType";
 import { Movement, MovementRef, resetAll, resetLeft, resetRight, resetUp, setLeft, setRight, setUp } from "../Function/Movement";
-import { serialize } from "../Function/Serialize";
 import { KeyControl, UserInfo, addUserInfoUpdatedCallback, email2uid, removeUserInfoUpdatedCallback, userInfo } from "../Function/types";
 import PlayerCamera from "./PlayerCamera";
 import StageMgr from "./StageMgr";
@@ -50,10 +49,8 @@ export default class Mario extends cc.Component implements MovementRef {
     private init_pos: cc.Vec2 = null;
     private anim: cc.Animation = null;
     private camera: PlayerCamera = null;
-    // stageMgr: StageMgr = null;
 
     // properties
-    
     @property({type: cc.Label})
     usernameLabel: cc.Label = null;
 
@@ -82,12 +79,12 @@ export default class Mario extends cc.Component implements MovementRef {
         cameraSwitch: -1
     };
     
-    onLoad () {
+    onLoad() {
         cc.director.getPhysicsManager().enabled = true;
         this.anim = this.getComponent(cc.Animation);
     }
     
-    start () {
+    start() {
         this.getComponent(cc.PhysicsCollider).tag = BodyType.PLAYER;
         cc.audioEngine.playMusic(this.BGM, true);
         if (!this.init_pos) {
@@ -130,14 +127,13 @@ export default class Mario extends cc.Component implements MovementRef {
         this.usernameLabel.string = info.username.toUpperCase();
     }
 
-    update (dt: number) {
+    update(dt: number) {
         // update dying status first
         this.isDying = this.anim.getAnimationState('MarioDead').isPlaying;
 
         if (this.winned || this.isDying)
             return; // playing dying animation
         
-        // cc.log(`update ${this.uid}`)
         this.updateMove(dt);
         this.updateAnime();
     }
@@ -437,7 +433,6 @@ export default class Mario extends cc.Component implements MovementRef {
                 ++this.onGround;
                 this.inDistBox = true;
             }
-            // cc.log(contact.getWorldManifold().normal.x, contact.getWorldManifold().normal.y)
             break;
         case BodyType.POWER_UP_MUSH:
         case BodyType.LIFE_UP_MUSH:

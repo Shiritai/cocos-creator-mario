@@ -188,7 +188,7 @@ export default class StageMgr extends cc.Component {
         }
     }
     
-    start () {
+    start() {
         // initialize game index
         if (userInfo.info) {
             this.coinNum = userInfo.info.coin;
@@ -266,7 +266,7 @@ export default class StageMgr extends cc.Component {
         this.pauseResumers = this.node.getComponentsInChildren(PauseResumer);
     }
 
-    update (dt: number) {
+    update(dt: number) {
         if (this.winned || this.paused)
             return;
         
@@ -685,7 +685,6 @@ export default class StageMgr extends cc.Component {
     }
 
     win() {
-        // let finalScore
         let finalScore = Math.ceil(this.score + Math.ceil(this.timer) * 10);
         this.resScoreLabel.string = finalScore.toString();
         this.resTimerNumLabel.string = this.timerNumLabel.string;
@@ -706,27 +705,29 @@ export default class StageMgr extends cc.Component {
         if (!userInfo.info)
             return; // no user logged in
         firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                if (this.life <= 0) { // game over
-                    updateUserInfo(getDefaultUserInfo(
-                        userInfo.info.email, userInfo.info.username, this.worldNum - 1));
-                } else { // win
-                    // upload score if has higher score rank
-                    if (userInfo.info.score < this.score) {
-                        updateRankList({
-                            uid: email2uid(userInfo.info.email), 
-                            username: userInfo.info.username,
-                            score: this.score
-                        });
-                        updateUserInfo({
-                            ...userInfo.info,
-                            life: this.life,
-                            coin: this.coinNum,
-                            score: this.score,
-                            time: this.timer,
-                            stage: this.worldNum,
-                        });
-                    }
+            if (!user)
+                return;
+            if (this.life <= 0) { // game over
+                updateUserInfo(getDefaultUserInfo(
+                    userInfo.info.email,
+                    userInfo.info.username,
+                    this.worldNum - 1));
+            } else { // win
+                // upload score if has higher score rank
+                if (userInfo.info.score < this.score) {
+                    updateRankList({
+                        uid: email2uid(userInfo.info.email), 
+                        username: userInfo.info.username,
+                        score: this.score
+                    });
+                    updateUserInfo({
+                        ...userInfo.info,
+                        life: this.life,
+                        coin: this.coinNum,
+                        score: this.score,
+                        time: this.timer,
+                        stage: this.worldNum,
+                    });
                 }
             }
         });
