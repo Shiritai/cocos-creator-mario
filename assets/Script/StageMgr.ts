@@ -8,6 +8,7 @@
 import { BodyType } from "../Function/BodyType";
 import { KeyControl, email2uid, getDefaultUserInfo, updateRankList, updateUserInfo, userInfo } from "../Function/types";
 import Mario from "./Mario";
+import PauseResumer from "./PauseResumer";
 import PlayerCamera from "./PlayerCamera";
 
 const {ccclass, property} = cc._decorator;
@@ -64,6 +65,9 @@ export default class StageMgr extends cc.Component {
 
     mainMario: Mario = null;
     marioList: Map<string, Mario> = new Map();
+
+    paused = false;
+    pauseResumers: PauseResumer[] = [];
     
     @property({type: PlayerCamera})
     camera: PlayerCamera = null;
@@ -257,10 +261,12 @@ export default class StageMgr extends cc.Component {
         
         for (let turtle of this.turtles.getComponentsInChildren(cc.Component))
             this.setUpTurtle(turtle);
+        
+        this.pauseResumers = this.node.getComponentsInChildren(PauseResumer);
     }
 
     update (dt: number) {
-        if (this.winned)
+        if (this.winned || this.paused)
             return;
         
         this.lifeNumLabel.string = this.life.toString();
@@ -277,6 +283,32 @@ export default class StageMgr extends cc.Component {
             for (let m of Array.from(this.marioList.values()))
                 this.loseOneLifeForCurrentMario(m, true);
         }
+    }
+
+    pauseOrResume() {
+        this.paused = !this.paused;
+        this.pauseResumers.forEach(pr => pr.pauseOrResume());
+    }
+
+    restart() {
+        cc.audioEngine.stopAll();
+        this.scheduleOnce(() => {
+            cc.director.loadScene('LoadStage');
+        })
+    }
+
+    volumeUp() {
+        let curVol = cc.audioEngine.getMusicVolume();
+        curVol = Math.min(curVol + 0.1, 1);
+        cc.audioEngine.setMusicVolume(curVol);
+        cc.audioEngine.setEffectsVolume(curVol);
+    }
+
+    volumeDown() {
+        let curVol = cc.audioEngine.getMusicVolume();
+        curVol = Math.max(curVol - 0.1, 0);
+        cc.audioEngine.setMusicVolume(curVol);
+        cc.audioEngine.setEffectsVolume(curVol);
     }
 
     onKeyDown(event: cc.Event.EventKeyboard) {
@@ -383,6 +415,7 @@ export default class StageMgr extends cc.Component {
                     this.powerMushroomPrefab :
                     this.healMushroomPrefab
                 );
+                this.pauseResumers.push(prefab.getComponent(PauseResumer));
                 questBox.node.addChild(prefab);
                 prefab.setPosition(cc.v2(5, 8));
 
