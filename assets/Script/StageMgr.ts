@@ -263,6 +263,7 @@ export default class StageMgr extends cc.Component {
         this.timer -= dt;
         this.timerNumLabel.string = Math.ceil(this.timer).toString();
         if (this.timer <= 0) {
+            this.resetTimeInInMode('None');
             for (let m of Array.from(this.marioList.values()))
                 this.loseOneLifeForCurrentMario(m, true);
         }
@@ -284,6 +285,18 @@ export default class StageMgr extends cc.Component {
         this.audioID = cc.audioEngine.playEffect(clip, false);
     }
 
+    resetTimeInInMode(mode: PlayingMode) {
+        switch (mode) {
+        case 'None': // all mode
+            this.timer = StageMgr.initTimerValue;
+            break;
+        default: // 
+            if (StageMgr.playMode.mode == mode)
+                this.timer = StageMgr.initTimerValue;
+            break;
+        }
+    }
+
     loseOneLifeForCurrentMario(mario: Mario, forceDead: boolean) {
         if (mario.isDying || mario.golden)
             return;
@@ -291,6 +304,9 @@ export default class StageMgr extends cc.Component {
             mario.playPowerDown();
         } else if (--this.life > 0) {
             mario.playLoseOneLife();
+            this.scheduleOnce(() => {
+                this.resetTimeInInMode('Single');
+            }, 2);
         } else { // game over
             mario.playGotHurt(() => {
                 // save data to firebase
@@ -466,7 +482,7 @@ export default class StageMgr extends cc.Component {
                     });
                 } else {
                     this.loseOneLifeForCurrentMario(
-                        otherCollider.node.getComponent('Mario'), false);
+                        otherCollider.node.getComponent(Mario), false);
                 }
                 break;
             case BodyType.DEAD_FLOOR:
@@ -509,7 +525,7 @@ export default class StageMgr extends cc.Component {
             switch (otherCollider.tag) {
             case BodyType.PLAYER:
                 this.loseOneLifeForCurrentMario(
-                    otherCollider.node.getComponent('Mario'), false);
+                    otherCollider.node.getComponent(Mario), false);
                 break;
             }
         }
