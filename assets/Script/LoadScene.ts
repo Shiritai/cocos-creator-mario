@@ -32,7 +32,7 @@ export default class LoadScene extends cc.Component {
     delay = 2;
 
     start() {
-        if (!ChooseStage.stageChoice || StageMgr.playMode.mode === 'None') {
+        if (!StageMgr.stageChoice || StageMgr.playMode.mode === 'None') {
             cc.log('Please choose a stage');
             this.scheduleOnce(() => { cc.director
                 .loadScene('ChooseStage') }, this.delay);
@@ -53,8 +53,8 @@ export default class LoadScene extends cc.Component {
             break;
         }
 
-        this.stageCount.string = ChooseStage.stageChoice.toString();
+        this.stageCount.string = StageMgr.stageChoice.toString();
         this.scheduleOnce(() => { cc.director
-            .loadScene(`Stage${ChooseStage.stageChoice}`) }, this.delay);
+            .loadScene(`Stage${StageMgr.stageChoice}`) }, this.delay);
     }
 }

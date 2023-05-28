@@ -13,7 +13,6 @@ const {ccclass, property} = cc._decorator;
 @ccclass
 export default class ChooseStage extends cc.Component {
 
-    static stageChoice: number;
     static readonly sceneName = "LoadStage";
     
     @property(cc.AudioClip)
@@ -116,12 +115,12 @@ export default class ChooseStage extends cc.Component {
     loadStageProcess(stageCount: number) {
         if (!userInfo.info) {
             alert(`You haven\'t signed in, but you can try stage ${stageCount} :)`);
-            ChooseStage.stageChoice = stageCount;
+            StageMgr.stageChoice = stageCount;
             cc.director.loadScene(ChooseStage.sceneName);
         } else {
             let availStageCount = userInfo.info.stage + 1;
             if (availStageCount >= stageCount) {
-                ChooseStage.stageChoice = stageCount;
+                StageMgr.stageChoice = stageCount;
                 cc.director.loadScene(ChooseStage.sceneName);
             } else {
                 alert(`You can\'t play this stage, please clear the former stage: ${availStageCount} first :)`);

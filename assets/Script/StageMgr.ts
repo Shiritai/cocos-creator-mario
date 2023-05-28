@@ -38,6 +38,7 @@ export default class StageMgr extends cc.Component {
     ]
 
     static stageMarioMap: Map<number, Map<string, Mario>> = new Map();
+    static stageChoice: number = -1;
     static playMode: {
         mode: PlayingMode,
         payload?: number,
