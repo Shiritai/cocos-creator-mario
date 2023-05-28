@@ -73,11 +73,7 @@
 
 目前實作離線單人與多人，多人定義為 1 ~ 4 人，可於階段選擇時設定。
 
-![選擇階段決定]()
-
 四位玩家中，除了主玩家 (登入帳號的那位) 外，其他皆命名為 `PlayerX`，X 為從 1 開始的編號。原則上與登入帳號之 Firebase 同步，這有利於擴展為多人連線遊戲。
-
-![離線多人遊戲畫面]()
 
 四位玩家操控按鍵列述如下 (左、上、右、focus)，盡量讓四位玩家的手不會打架的情況下易於點按。
 
@@ -250,7 +246,7 @@ Leader board 如 UI 中所述，以星型按鈕查看 leader board。當中對�
 * 1 ~ 4 人，共享生命、金幣、剩餘時間、分數。
 * 除登入之主玩家的瑪莉歐頭上有註冊時的名稱外，其餘玩家以 `player` 搭配流水號命名
 * 所有人都到終點才算勝利
-* 攝影機只會追蹤主玩家，增加遊戲難度並降低多人分數優勢
+* 攝影機只會追蹤一位玩家，增加遊戲難度並降低多人分數優勢
 * 某玩家 power up/down 或死亡不會停頓或轉移至載入畫面，而是繼續進行，增加其他玩家的遊戲體驗
 
 ### Eatable coin
@@ -305,9 +301,4 @@ Question Box 有三種，除金幣和 power up 的蘑菇外，多一個回血蘑
 
 # Firebase page link
 
-基本上使用以下頁面，但很不幸的是 Firebase 最近怪怪的，所以我會 deploy 到不同 project 下避免 firebase 方面的問題。
-
-* 主要連結
-    [https://ss-assignment2-mario.web.app/](https://ss-assignment2-mario.web.app/)
-* 備用連結
-    [https://ss-assignment2-mario-109062274.web.app/](https://ss-assignment2-mario-109062274.web.app/)
+[https://ss-assignment2-mario.web.app/](https://ss-assignment2-mario.web.app/)
