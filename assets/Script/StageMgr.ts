@@ -221,7 +221,8 @@ export default class StageMgr extends cc.Component {
             otherCollider: cc.PhysicsCollider) => 
         {
             if (otherCollider.node.name === 'Mario') {
-                otherCollider.node.getComponent(Mario).win();
+                let mario = otherCollider.node.getComponent(Mario);
+                mario.win();
                 // all marios wins -> win the whole game
                 if (Array.from(this.marioList.values()).every(m => m.winned))
                     this.win();
@@ -383,7 +384,6 @@ export default class StageMgr extends cc.Component {
                 cc.moveBy(0.1, 0, -5).easing(cc.easeInOut(2)),
                 cc.callFunc(() => {
                     qBox.active = false;
-                    // rigid.enabledContactListener = false;
                 })
             );
             questBox.node.runAction(action);
@@ -582,9 +582,9 @@ export default class StageMgr extends cc.Component {
             }
         }
         let flowerAction = cc.sequence(
-            cc.moveBy(2, cc.v2(0, 16)),
+            cc.moveBy(2, cc.v2(0, 12)),
             cc.moveBy(2, cc.v2(0, 0)), // stall
-            cc.moveBy(2, cc.v2(0, -16)),
+            cc.moveBy(2, cc.v2(0, -12)),
             cc.moveBy(2, cc.v2(0, 0)), // stall
         ).repeatForever();
         flower.node.runAction(flowerAction);

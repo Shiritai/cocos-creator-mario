@@ -143,38 +143,37 @@ export default class Mario extends cc.Component implements MovementRef {
     }
 
     /**
-     * Upload mario info onto firebase
-     */
-    upload() {
-        
-    }
-
-    /**
      * Anime: visual + audio
      */
     updateAnime() {
-        let v_x = this.node.getComponent(cc.RigidBody).linearVelocity.x;
+        let rigid = this.node.getComponent(cc.RigidBody);
+        let v_x = rigid.linearVelocity.x;
+        let v_y = rigid.linearVelocity.y;
         switch (this.move) {
         case Movement.LEFT:
-            if (v_x > 100) {
-                this.playAnime('MarioStop');
-                this.peekRight();
-            } else if (v_x > 0) {
-                this.playAnime('MarioGoBack');
-                this.peekRight();
-            } else {
-                this.playAnime('MarioRun');
+            if (!v_y) {
+                if (v_x > 100) {
+                    this.playAnime('MarioStop');
+                    this.peekRight();
+                } else if (v_x > 0) {
+                    this.playAnime('MarioGoBack');
+                    this.peekRight();
+                } else {
+                    this.playAnime('MarioRun');
+                }
             }
             break;
         case Movement.RIGHT:
-            if (v_x < -100) {
-                this.playAnime('MarioStop');
-                this.peekLeft();
-            } else if (v_x < 0) {
-                this.playAnime('MarioGoBack');
-                this.peekLeft();
-            } else {
-                this.playAnime('MarioRun');
+            if (!v_y) {
+                if (v_x < -100) {
+                    this.playAnime('MarioStop');
+                    this.peekLeft();
+                } else if (v_x < 0) {
+                    this.playAnime('MarioGoBack');
+                    this.peekLeft();
+                } else {
+                    this.playAnime('MarioRun');
+                }
             }
             break;
         case Movement.UP: case Movement.UP_LEFT: case Movement.UP_RIGHT:
@@ -285,6 +284,7 @@ export default class Mario extends cc.Component implements MovementRef {
             phy.size.height += 4;
             phy.offset.y -= 3.5;
             this.playBlink();
+            this.anim.play('BigMarioIdle')
             this.playEffect(this.powerUpClip);
         }
     }
@@ -306,17 +306,10 @@ export default class Mario extends cc.Component implements MovementRef {
         this.playGotHurt(() => {
             this.scheduleOnce(() => {
                 this.getComponent(cc.PhysicsCollider).enabled = true;
+                this.peekLeft();
                 this.node.setPosition(this.init_pos);
                 cc.audioEngine.playMusic(this.BGM, true);
                 this.playGolden(); // golden state when reborn
-            });
-        });
-    }
-
-    playGameOver() {
-        this.playGotHurt(() => {
-            this.scheduleOnce(() => {
-                cc.director.loadScene('GameOver');
             });
         });
     }
@@ -327,24 +320,25 @@ export default class Mario extends cc.Component implements MovementRef {
         this.scheduleOnce(() => {
             this.golden = false;
         }, 2);
+
     }
 
-    playGotHurt(animeFinishedCallback: () => void) {
+    playGotHurt(animeFinishedCallback?: () => void) {
         this.getComponent(cc.RigidBody).linearVelocity = cc.v2(0, 1000);
         this.playAnime('MarioDead');
         this.getComponent(cc.PhysicsCollider).enabled = false;
         cc.audioEngine.stopMusic();
         cc.audioEngine.stopAllEffects();
         this.playEffect(this.loseOneLifeClip);
-        this.anim.once('finished', animeFinishedCallback);
+        if (animeFinishedCallback)
+            this.anim.once('finished', animeFinishedCallback);
     }
 
     win() {
         this.winned = true;
         this.move = Movement.STAY;
-        let rigid = this.getComponent(cc.RigidBody)
+        let rigid = this.getComponent(cc.RigidBody);
         rigid.linearVelocity = cc.v2(0, 0);
-        this.scheduleOnce(() => rigid.type = cc.RigidBodyType.Kinematic)
     }
 
     onKeyDown(event: cc.Event.EventKeyboard) {
