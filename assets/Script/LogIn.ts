@@ -30,7 +30,6 @@ export default class LogIn extends cc.Component {
         firebase.auth()
             .signInWithEmailAndPassword(email, password)
             .then(() => {
-                cc.log(`uid: ${uid}`);
                 firebaseOnUpdateUserInfo(uid);
                 firebaseAssignUpdateCallback(uid);
                 firebaseOnUpdateRankList();
