@@ -31,7 +31,7 @@
 
 ---
 
-## Basic Components Description : 
+## Basic Components Description
 
 ### World map
 
