@@ -99,6 +99,7 @@ export function updateRankList(newItem: RankItem, needUpdate = true) {
         if (item.uid === newItem.uid) {
             if (newItem.score > item.score) {
                 item.score = newItem.score;
+                rankList.list.sort((a, b) => b.score - a.score);
                 firebase.database().ref(`scores/${newItem.uid}`)
                     .update(newItem);
                 toCallback = true;
@@ -109,8 +110,8 @@ export function updateRankList(newItem: RankItem, needUpdate = true) {
     }
     if (!toCallback) {
         let newList = rankList.list.concat(newItem).sort((a, b) => b.score - a.score);
-        if (newList.length <= 5 || newList[0].uid !== newItem.uid) { // need update
-            rankList.list = newList;
+        if (newList.length <= 5 || newList[0].uid === newItem.uid) { // need update
+            rankList.list = newList.slice(0, 5);
             if (needUpdate) {
                 // update new score
                 firebase.database().ref(`scores/${newItem.uid}`)

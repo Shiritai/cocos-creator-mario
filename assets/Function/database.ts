@@ -11,7 +11,7 @@ export function firebaseOnUpdateUserInfo(uid: string) {
                 cc.log('Load from firebase');
                 updateUserInfo(snapshot.val());
             } else {
-                console.log("No data available");
+                cc.log("No data available");
             }
         })
 }
@@ -35,10 +35,10 @@ export function firebaseOnUpdateRankList() {
                         username: child.val().username,
                         score: child.val().score
                     }, false);
-                })
+                });
                 cc.log('Load rankList from firebase');
             } else {
-                console.log("No list available");
+                cc.log("No list available");
             }
         })
 }
