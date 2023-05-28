@@ -49,7 +49,7 @@
   * 具深度的盒子，橘、藍、綠三色皆然
     ![Stage 1 截圖](./img/distBox.png)
   * (Stage 2) 隱藏通道
-    ![Stage 2 截圖]()
+    ![Stage 2 截圖](./img/hiddenPath.png)
 * 敵人
   * Goomba
   * Turtle
