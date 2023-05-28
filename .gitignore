@@ -50,6 +50,7 @@ Thumbs.db
 
 .vscode/
 # for firebase security
+.firebase
+.firebaserc
 firebase.js
 firebase.json
-.firebase
