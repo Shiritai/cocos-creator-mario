@@ -1,5 +1,10 @@
 # Software Studio 2023 Spring Assignment 2
 
+## Deploy link
+
+* Newest: [https://mario-shiritai.web.app/](https://mario-shiritai.web.app/)
+* Old version: [https://ss-assignment2-mario.web.app/](https://ss-assignment2-mario.web.app/)
+
 ### Scoring
 
 |  **Basic Component**  | **Score** | **Check** |

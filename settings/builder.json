@@ -8,7 +8,7 @@
   },
   "packageName": "org.cocos2d.helloworld",
   "startScene": "df147882-54af-4689-9d5f-5cf2b2963412",
-  "title": "Software_Studio_Assignment2_Mario_109062274",
+  "title": "Mario",
   "webOrientation": "auto",
   "inlineSpriteFrames": true,
   "inlineSpriteFrames_native": true,
